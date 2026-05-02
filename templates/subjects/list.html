@@ -1,0 +1,103 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Fanlar — EduRelevance{% endblock %}
+
+{% block content %}
+<div class="page-header fade-in">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+        <div>
+            <h1 class="page-title glitch" data-text="FANLAR">
+                <i class="fas fa-th-large" style="margin-right:12px;font-size:1.3rem;"></i>FANLAR
+            </h1>
+            <p class="page-subtitle">// Barcha mavjud fanlar ro'yxati</p>
+        </div>
+        <button onclick="document.getElementById('createSubjectModal').style.display='flex'"
+                class="btn-cyber btn-success">
+            <i class="fas fa-plus"></i> Fan yaratish
+        </button>
+    </div>
+</div>
+
+{% if subjects %}
+<div class="grid-2 stagger">
+    {% for subject in subjects %}
+    <a href="{% url 'subjects:detail' subject.pk %}" style="text-decoration:none;">
+        <div class="cyber-card">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1rem;">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <div style="width:42px;height:42px;background:rgba(0,245,255,0.1);border:1px solid rgba(0,245,255,0.2);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+                        <i class="fas fa-book" style="color:var(--cyan);font-size:1.1rem;"></i>
+                    </div>
+                    <div>
+                        <h3 style="font-family:'Orbitron',monospace;font-size:0.95rem;color:var(--text-primary);letter-spacing:1px;">
+                            {{ subject.name }}
+                        </h3>
+                        <span style="font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:var(--text-muted);">
+                            {{ subject.topic_count }} ta mavzu
+                            {% if not subject.is_public %}
+                            · <span style="color:var(--cyan)">Mening fanim</span>
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+                <i class="fas fa-chevron-right" style="color:var(--text-muted);font-size:0.8rem;margin-top:4px;"></i>
+            </div>
+            {% if subject.description %}
+            <p style="color:var(--text-secondary);font-size:0.85rem;line-height:1.6;margin-bottom:1rem;">
+                {{ subject.description|truncatechars:120 }}
+            </p>
+            {% endif %}
+            {% if subject.topics.all %}
+            <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                {% for topic in subject.topics.all|slice:":4" %}
+                <span style="background:rgba(0,245,255,0.06);border:1px solid rgba(0,245,255,0.15);padding:3px 10px;border-radius:20px;font-size:0.72rem;color:var(--text-secondary);font-family:'Share Tech Mono',monospace;">
+                    {{ topic.name }}
+                </span>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <i class="fas fa-database"></i>
+    <p>Hozircha hech qanday fan yo'q.</p>
+</div>
+{% endif %}
+
+<!-- Create Subject Modal -->
+<div id="createSubjectModal"
+     style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(6px);">
+    <div class="cyber-card" style="width:100%;max-width:460px;margin:1rem;position:relative;">
+        <button onclick="document.getElementById('createSubjectModal').style.display='none'"
+                style="position:absolute;top:12px;right:12px;background:none;border:none;color:var(--text-muted);font-size:1.1rem;cursor:pointer;">
+            <i class="fas fa-times"></i>
+        </button>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.85rem;color:var(--text-muted);margin-bottom:1.2rem;">
+            // YANGI FAN YARATISH
+        </div>
+        <form method="post" action="{% url 'subjects:create_subject' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label class="form-label">Fan nomi *</label>
+                <input type="text" name="name" class="cyber-input" placeholder="Masalan: Matematika" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Tavsif</label>
+                <textarea name="description" class="cyber-input" placeholder="Fan haqida qisqacha..." rows="3"></textarea>
+            </div>
+            <div style="background:rgba(0,245,255,0.04);border:1px solid rgba(0,245,255,0.1);border-radius:6px;padding:10px 14px;margin-bottom:1.2rem;">
+                <span style="font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:var(--text-muted);">
+                    <i class="fas fa-info-circle" style="color:var(--cyan);margin-right:6px;"></i>
+                    Bu fan faqat sizga ko'rinadi
+                </span>
+            </div>
+            <button type="submit" class="btn-cyber btn-success" style="width:100%;justify-content:center;">
+                <i class="fas fa-plus"></i> Yaratish
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

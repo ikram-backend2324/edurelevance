@@ -1,0 +1,155 @@
+{% extends 'base/base.html' %}
+
+{% block title %}{{ topic.name }} — EduRelevance{% endblock %}
+
+{% block content %}
+<div class="page-header fade-in">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:0.5rem;flex-wrap:wrap;">
+        <a href="{% url 'subjects:list' %}" style="color:var(--text-muted);text-decoration:none;font-family:'Share Tech Mono',monospace;font-size:0.8rem;">
+            Fanlar
+        </a>
+        <span style="color:var(--text-muted);">/</span>
+        <a href="{% url 'subjects:detail' topic.subject.pk %}" style="color:var(--text-muted);text-decoration:none;font-family:'Share Tech Mono',monospace;font-size:0.8rem;">
+            {{ topic.subject.name }}
+        </a>
+        <span style="color:var(--text-muted);">/</span>
+        <span style="color:var(--text-secondary);font-family:'Share Tech Mono',monospace;font-size:0.8rem;">{{ topic.name }}</span>
+    </div>
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+        <div>
+            <h1 class="page-title">
+                <i class="fas fa-bookmark" style="margin-right:12px;"></i>{{ topic.name }}
+            </h1>
+            {% if topic.description %}
+            <p class="page-subtitle">{{ topic.description }}</p>
+            {% endif %}
+        </div>
+        <a href="{% url 'resources:upload' %}?topic={{ topic.pk }}" class="btn-cyber btn-success">
+            <i class="fas fa-upload"></i> Resurs yuklash
+        </a>
+    </div>
+</div>
+
+<!-- Stats bar -->
+<div style="display:flex;gap:1rem;margin-bottom:2rem;flex-wrap:wrap;" class="fade-in">
+    {% with total=resources|length %}
+    <div class="cyber-card" style="padding:1rem 1.5rem;flex:1;min-width:140px;">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:var(--text-muted);margin-bottom:4px;">JAMI</div>
+        <div style="font-family:'Orbitron',monospace;font-size:1.5rem;color:var(--cyan);">{{ total }}</div>
+    </div>
+    {% endwith %}
+    <div class="cyber-card" style="padding:1rem 1.5rem;flex:1;min-width:140px;">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:var(--text-muted);margin-bottom:4px;">YUQORI</div>
+        <div style="font-family:'Orbitron',monospace;font-size:1.5rem;color:var(--green);">
+            {{ resources|length }}
+        </div>
+    </div>
+</div>
+
+{% if resources %}
+<div style="font-family:'Share Tech Mono',monospace;font-size:0.8rem;color:var(--text-muted);margin-bottom:1rem;">
+    // Resurslar dolzarblik bo'yicha saralangan
+</div>
+<div style="display:flex;flex-direction:column;gap:1rem;" class="stagger">
+    {% for resource in resources %}
+    <div class="cyber-card">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+            <div style="flex:1;min-width:200px;">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap;">
+                    <!-- Resource type icon -->
+                    {% if resource.resource_type == 'pdf' %}
+                    <div style="width:32px;height:32px;background:rgba(255,23,68,0.1);border:1px solid rgba(255,23,68,0.3);border-radius:6px;display:flex;align-items:center;justify-content:center;">
+                        <i class="fas fa-file-pdf" style="color:#ff4569;font-size:0.85rem;"></i>
+                    </div>
+                    {% elif resource.resource_type == 'url' %}
+                    <div style="width:32px;height:32px;background:rgba(0,245,255,0.1);border:1px solid rgba(0,245,255,0.2);border-radius:6px;display:flex;align-items:center;justify-content:center;">
+                        <i class="fas fa-link" style="color:var(--cyan);font-size:0.85rem;"></i>
+                    </div>
+                    {% else %}
+                    <div style="width:32px;height:32px;background:rgba(124,58,237,0.15);border:1px solid rgba(124,58,237,0.3);border-radius:6px;display:flex;align-items:center;justify-content:center;">
+                        <i class="fas fa-align-left" style="color:#a78bfa;font-size:0.85rem;"></i>
+                    </div>
+                    {% endif %}
+
+                    <a href="{% url 'resources:detail' resource.pk %}" style="color:var(--text-primary);text-decoration:none;font-weight:600;font-size:1rem;transition:color .2s;"
+                       onmouseover="this.style.color='var(--cyan)'" onmouseout="this.style.color='var(--text-primary)'">
+                        {{ resource.title }}
+                    </a>
+
+                    <!-- Score badge -->
+                    {% if resource.score %}
+                        {% if resource.score.label == 'high' %}
+                        <span class="badge-high"><i class="fas fa-arrow-up"></i> Yuqori</span>
+                        {% elif resource.score.label == 'medium' %}
+                        <span class="badge-medium"><i class="fas fa-minus"></i> O'rta</span>
+                        {% else %}
+                        <span class="badge-low"><i class="fas fa-arrow-down"></i> Past</span>
+                        {% endif %}
+                    {% else %}
+                    <span style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:var(--text-muted);padding:3px 10px;border-radius:20px;font-size:0.72rem;font-family:'Share Tech Mono',monospace;">
+                        Baholanmagan
+                    </span>
+                    {% endif %}
+                </div>
+
+                <div style="font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:var(--text-muted);margin-bottom:8px;">
+                    <i class="fas fa-user" style="margin-right:4px;"></i>{{ resource.uploaded_by.username }}
+                    &nbsp;&nbsp;
+                    <i class="fas fa-clock" style="margin-right:4px;"></i>{{ resource.uploaded_at|date:"d.m.Y H:i" }}
+                </div>
+
+                {% if resource.score %}
+                <!-- Score bar -->
+                <div style="max-width:300px;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+                        <span style="font-family:'Share Tech Mono',monospace;font-size:0.72rem;color:var(--text-muted);">Dolzarblik</span>
+                        <span style="font-family:'Orbitron',monospace;font-size:0.8rem;
+                            {% if resource.score.label == 'high' %}color:var(--green)
+                            {% elif resource.score.label == 'medium' %}color:var(--orange)
+                            {% else %}color:var(--red){% endif %}">
+                            {{ resource.score.score_percent }}%
+                        </span>
+                    </div>
+                    <div class="score-bar-wrap">
+                        <div class="score-bar {{ resource.score.label }}"
+                             style="width:{{ resource.score.score_percent }}%"></div>
+                    </div>
+                </div>
+
+                {% if resource.score.reason %}
+                <p style="color:var(--text-secondary);font-size:0.82rem;margin-top:8px;line-height:1.5;font-style:italic;">
+                    "{{ resource.score.reason }}"
+                </p>
+                {% endif %}
+                {% endif %}
+            </div>
+
+            <!-- Actions -->
+            <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
+                {% if resource.url %}
+                <a href="{{ resource.url }}" target="_blank" class="btn-cyber btn-primary" style="padding:6px 14px;font-size:0.75rem;">
+                    <i class="fas fa-external-link-alt"></i>
+                </a>
+                {% endif %}
+                {% if resource.uploaded_by == request.user %}
+                <a href="{% url 'resources:delete' resource.pk %}"
+                   onclick="return confirm('Resursni o\'chirishni tasdiqlaysizmi?')"
+                   class="btn-cyber btn-danger" style="padding:6px 14px;font-size:0.75rem;">
+                    <i class="fas fa-trash"></i>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    <i class="fas fa-inbox"></i>
+    <p>Bu mavzu uchun hali resurs yuklanmagan.</p>
+    <a href="{% url 'resources:upload' %}?topic={{ topic.pk }}" class="btn-cyber btn-success" style="margin-top:1.5rem;display:inline-flex;">
+        <i class="fas fa-upload"></i> Birinchi resursni yuklash
+    </a>
+</div>
+{% endif %}
+{% endblock %}

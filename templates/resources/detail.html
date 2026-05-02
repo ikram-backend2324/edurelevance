@@ -1,0 +1,193 @@
+{% extends 'base/base.html' %}
+
+{% block title %}{{ resource.title }} — EduRelevance{% endblock %}
+
+{% block content %}
+<div class="page-header fade-in">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:0.5rem;flex-wrap:wrap;">
+        <a href="{% url 'subjects:topic_detail' resource.topic.pk %}" style="color:var(--text-muted);text-decoration:none;font-family:'Share Tech Mono',monospace;font-size:0.8rem;">
+            <i class="fas fa-arrow-left"></i> {{ resource.topic.name }}
+        </a>
+    </div>
+    <h1 class="page-title" style="font-size:1.3rem;">{{ resource.title }}</h1>
+    <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-top:0.5rem;">
+        <span style="font-family:'Share Tech Mono',monospace;font-size:0.8rem;color:var(--text-muted);">
+            <i class="fas fa-user"></i> {{ resource.uploaded_by.username }}
+        </span>
+        <span style="font-family:'Share Tech Mono',monospace;font-size:0.8rem;color:var(--text-muted);">
+            <i class="fas fa-clock"></i> {{ resource.uploaded_at|date:"d.m.Y H:i" }}
+        </span>
+        <span style="font-family:'Share Tech Mono',monospace;font-size:0.8rem;color:var(--text-muted);">
+            <i class="fas fa-tag"></i> {{ resource.get_resource_type_display }}
+        </span>
+    </div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 340px;gap:1.5rem;align-items:start;" class="fade-in">
+    <!-- Main content -->
+    <div>
+        <!-- Score card -->
+        {% if resource.score %}
+        <div class="cyber-card" style="margin-bottom:1.5rem;">
+            <div style="font-family:'Share Tech Mono',monospace;font-size:0.78rem;color:var(--text-muted);margin-bottom:1rem;">
+                // AI BAHOLASH NATIJASI
+            </div>
+            <div style="display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;margin-bottom:1.2rem;">
+                <!-- Big score circle -->
+                <div style="position:relative;width:90px;height:90px;flex-shrink:0;">
+                    <svg viewBox="0 0 90 90" style="width:90px;height:90px;transform:rotate(-90deg);">
+                        <circle cx="45" cy="45" r="38" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="6"/>
+                        <circle cx="45" cy="45" r="38" fill="none"
+                            stroke="{% if resource.score.label == 'high' %}#00ff88{% elif resource.score.label == 'medium' %}#ff6b00{% else %}#ff1744{% endif %}"
+                            stroke-width="6"
+                            stroke-dasharray="{{ resource.score.score_percent|floatformat:0 }} 100"
+                            stroke-dasharray="238.76"
+                            stroke-dashoffset="{{ resource.score.score_percent|add:'0' }}"
+                            style="stroke-dasharray:{% widthratio resource.score.score 1 238 %} 238;"/>
+                    </svg>
+                    <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;">
+                        <span style="font-family:'Orbitron',monospace;font-size:1.1rem;font-weight:700;
+                            {% if resource.score.label == 'high' %}color:var(--green)
+                            {% elif resource.score.label == 'medium' %}color:var(--orange)
+                            {% else %}color:var(--red){% endif %}">
+                            {{ resource.score.score_percent }}%
+                        </span>
+                    </div>
+                </div>
+                <div>
+                    {% if resource.score.label == 'high' %}
+                    <span class="badge-high" style="font-size:0.9rem;padding:5px 14px;"><i class="fas fa-arrow-up"></i> Yuqori Dolzarblik</span>
+                    {% elif resource.score.label == 'medium' %}
+                    <span class="badge-medium" style="font-size:0.9rem;padding:5px 14px;"><i class="fas fa-minus"></i> O'rta Dolzarblik</span>
+                    {% else %}
+                    <span class="badge-low" style="font-size:0.9rem;padding:5px 14px;"><i class="fas fa-arrow-down"></i> Past Dolzarblik</span>
+                    {% endif %}
+                    <p style="color:var(--text-secondary);font-size:0.88rem;margin-top:10px;line-height:1.6;max-width:400px;">
+                        {{ resource.score.reason }}
+                    </p>
+                </div>
+            </div>
+
+            {% if resource.score.key_matches %}
+            <div style="margin-bottom:1rem;">
+                <div style="font-family:'Share Tech Mono',monospace;font-size:0.72rem;color:var(--text-muted);margin-bottom:6px;">MOS KALIT SO'ZLAR:</div>
+                <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                    {% for kw in resource.score.key_matches %}
+                    <span style="background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.2);color:var(--green);padding:3px 10px;border-radius:20px;font-size:0.75rem;font-family:'Share Tech Mono',monospace;">
+                        ✓ {{ kw }}
+                    </span>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            {% if resource.score.missing_topics %}
+            <div>
+                <div style="font-family:'Share Tech Mono',monospace;font-size:0.72rem;color:var(--text-muted);margin-bottom:6px;">YETISHMAYOTGAN:</div>
+                <div style="display:flex;flex-wrap:wrap;gap:6px;">
+                    {% for mt in resource.score.missing_topics %}
+                    <span style="background:rgba(255,107,0,0.08);border:1px solid rgba(255,107,0,0.2);color:var(--orange);padding:3px 10px;border-radius:20px;font-size:0.75rem;font-family:'Share Tech Mono',monospace;">
+                        ✗ {{ mt }}
+                    </span>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        {% else %}
+        <div class="cyber-card" style="margin-bottom:1.5rem;text-align:center;padding:2rem;">
+            <i class="fas fa-hourglass-half" style="color:var(--text-muted);font-size:2rem;margin-bottom:0.5rem;display:block;"></i>
+            <p style="font-family:'Share Tech Mono',monospace;font-size:0.85rem;color:var(--text-muted);">Hali baholanmagan</p>
+        </div>
+        {% endif %}
+
+        <!-- Resource preview -->
+        {% if resource.raw_text %}
+        <div class="cyber-card">
+            <div style="font-family:'Share Tech Mono',monospace;font-size:0.78rem;color:var(--text-muted);margin-bottom:1rem;">
+                // AJRATILGAN MATN (dastlabki 500 belgi)
+            </div>
+            <p style="color:var(--text-secondary);font-size:0.85rem;line-height:1.7;white-space:pre-wrap;">{{ resource.raw_text|truncatechars:500 }}</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Sidebar -->
+    <div>
+        <div class="cyber-card" style="margin-bottom:1rem;">
+            <div style="font-family:'Share Tech Mono',monospace;font-size:0.78rem;color:var(--text-muted);margin-bottom:1rem;">// MA'LUMOT</div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+                <div>
+                    <div style="font-family:'Share Tech Mono',monospace;font-size:0.72rem;color:var(--text-muted);margin-bottom:3px;">FAN</div>
+                    <a href="{% url 'subjects:detail' resource.topic.subject.pk %}" style="color:var(--cyan);text-decoration:none;font-size:0.88rem;">{{ resource.topic.subject.name }}</a>
+                </div>
+                <div>
+                    <div style="font-family:'Share Tech Mono',monospace;font-size:0.72rem;color:var(--text-muted);margin-bottom:3px;">MAVZU</div>
+                    <a href="{% url 'subjects:topic_detail' resource.topic.pk %}" style="color:var(--text-primary);text-decoration:none;font-size:0.88rem;">{{ resource.topic.name }}</a>
+                </div>
+                <div>
+                    <div style="font-family:'Share Tech Mono',monospace;font-size:0.72rem;color:var(--text-muted);margin-bottom:3px;">TUR</div>
+                    <span style="font-size:0.88rem;color:var(--text-secondary);">{{ resource.get_resource_type_display }}</span>
+                </div>
+            </div>
+        </div>
+
+        {% if resource.url %}
+        <a href="{{ resource.url }}" target="_blank" class="btn-cyber btn-primary" style="width:100%;justify-content:center;margin-bottom:8px;">
+            <i class="fas fa-external-link-alt"></i> Manbaga o'tish
+        </a>
+        {% endif %}
+
+        {% if resource.uploaded_by == request.user %}
+        <button onclick="reevaluate({{ resource.pk }})"
+                class="btn-cyber btn-primary"
+                style="width:100%;justify-content:center;margin-bottom:8px;"
+                id="reevalBtn">
+            <i class="fas fa-sync-alt"></i> Qayta baholash
+        </button>
+        <a href="{% url 'resources:delete' resource.pk %}"
+           onclick="return confirm('O\'chirishni tasdiqlaysizmi?')"
+           class="btn-cyber btn-danger" style="width:100%;justify-content:center;">
+            <i class="fas fa-trash"></i> O'chirish
+        </a>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+async function reevaluate(pk) {
+    const btn = document.getElementById('reevalBtn');
+    btn.innerHTML = '<span class="spinner"></span>&nbsp; Baholanmoqda...';
+    btn.disabled = true;
+    btn.style.opacity = '0.7';
+
+    try {
+        const resp = await fetch(`/resources/${pk}/reevaluate/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            }
+        });
+        const data = await resp.json();
+        if (data.success) {
+            btn.innerHTML = `✅ Ball: ${data.score}% — yangilanmoqda...`;
+            btn.style.color = 'var(--green)';
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            btn.innerHTML = `❌ Xato: ${data.error}`;
+            btn.style.color = 'var(--red)';
+            btn.disabled = false;
+            btn.style.opacity = '1';
+        }
+    } catch(e) {
+        btn.innerHTML = '❌ Ulanish xatosi';
+        btn.style.color = 'var(--red)';
+        btn.disabled = false;
+        btn.style.opacity = '1';
+    }
+}
+</script>
+{% endblock %}

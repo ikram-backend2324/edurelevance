@@ -1,0 +1,157 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Resurs yuklash — EduRelevance{% endblock %}
+
+{% block content %}
+<div class="page-header fade-in">
+    <h1 class="page-title">
+        <i class="fas fa-upload" style="margin-right:12px;"></i>RESURS YUKLASH
+    </h1>
+    <p class="page-subtitle">// AI yordamida dolzarblik avtomatik baholanadi</p>
+</div>
+
+<div style="max-width:600px;" class="fade-in">
+    <div class="cyber-card">
+        <!-- Info bar -->
+        <div style="background:rgba(0,245,255,0.05);border:1px solid rgba(0,245,255,0.15);border-radius:6px;padding:12px 16px;margin-bottom:1.5rem;display:flex;align-items:center;gap:10px;">
+            <i class="fas fa-robot" style="color:var(--cyan);"></i>
+            <span style="font-family:'Share Tech Mono',monospace;font-size:0.8rem;color:var(--text-secondary);">
+                Resurs yuklanganidan so'ng AI avtomatik ravishda dolzarbligini baholaydi
+            </span>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" id="uploadForm">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label class="form-label">Mavzu</label>
+                {{ form.topic }}
+                {% if form.topic.errors %}<div class="form-error">{{ form.topic.errors.0 }}</div>{% endif %}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Sarlavha</label>
+                {{ form.title }}
+                {% if form.title.errors %}<div class="form-error">{{ form.title.errors.0 }}</div>{% endif %}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Resurs turi</label>
+                {{ form.resource_type }}
+                {% if form.resource_type.errors %}<div class="form-error">{{ form.resource_type.errors.0 }}</div>{% endif %}
+            </div>
+
+            <!-- PDF section -->
+            <div id="section-pdf" class="form-group resource-section" style="display:none;">
+                <label class="form-label">
+                    <i class="fas fa-file-pdf" style="color:#ff4569;margin-right:4px;"></i>PDF Fayl
+                </label>
+                <div style="border:1px dashed rgba(0,245,255,0.2);border-radius:6px;padding:1.5rem;text-align:center;transition:all .3s;" id="dropzone">
+                    {{ form.file }}
+                    <div style="margin-top:8px;font-family:'Share Tech Mono',monospace;font-size:0.78rem;color:var(--text-muted);">
+                        Faqat .pdf formatdagi fayllar
+                    </div>
+                </div>
+                {% if form.file.errors %}<div class="form-error">{{ form.file.errors.0 }}</div>{% endif %}
+            </div>
+
+            <!-- URL section -->
+            <div id="section-url" class="form-group resource-section" style="display:none;">
+                <label class="form-label">
+                    <i class="fas fa-link" style="color:var(--cyan);margin-right:4px;"></i>URL Havola
+                </label>
+                {{ form.url }}
+                {% if form.url.errors %}<div class="form-error">{{ form.url.errors.0 }}</div>{% endif %}
+            </div>
+
+            <!-- Text section -->
+            <div id="section-text" class="form-group resource-section" style="display:none;">
+                <label class="form-label">
+                    <i class="fas fa-align-left" style="color:#a78bfa;margin-right:4px;"></i>Matn
+                </label>
+                {{ form.text_content }}
+                {% if form.text_content.errors %}<div class="form-error">{{ form.text_content.errors.0 }}</div>{% endif %}
+            </div>
+
+            {% if form.non_field_errors %}
+            <div class="form-error" style="margin-bottom:1rem;padding:10px;background:rgba(255,23,68,0.1);border-radius:4px;">
+                {{ form.non_field_errors.0 }}
+            </div>
+            {% endif %}
+
+            <button type="submit" class="btn-cyber btn-primary" style="width:100%;justify-content:center;padding:13px;" id="submitBtn">
+                <i class="fas fa-upload"></i>
+                <span id="submitText">Yuklash va Baholash</span>
+                <span id="submitSpinner" style="display:none;" class="spinner"></span>
+            </button>
+        </form>
+    </div>
+
+    <!-- How it works -->
+    <div class="cyber-card" style="margin-top:1.2rem;">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:0.78rem;color:var(--text-muted);margin-bottom:1rem;">
+            // QANDAY ISHLAYDI
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+                <div style="width:28px;height:28px;background:rgba(0,245,255,0.1);border:1px solid rgba(0,245,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Orbitron',monospace;font-size:0.7rem;color:var(--cyan);flex-shrink:0;">1</div>
+                <span style="font-size:0.85rem;color:var(--text-secondary);">Resurs yuklanadi (PDF, URL yoki matn)</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;">
+                <div style="width:28px;height:28px;background:rgba(0,245,255,0.1);border:1px solid rgba(0,245,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Orbitron',monospace;font-size:0.7rem;color:var(--cyan);flex-shrink:0;">2</div>
+                <span style="font-size:0.85rem;color:var(--text-secondary);">Matn avtomatik ajratiladi</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;">
+                <div style="width:28px;height:28px;background:rgba(0,245,255,0.1);border:1px solid rgba(0,245,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Orbitron',monospace;font-size:0.7rem;color:var(--cyan);flex-shrink:0;">3</div>
+                <span style="font-size:0.85rem;color:var(--text-secondary);">AI (OpenRouter LLM) mavzu bilan solishtirib baholaydi</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;">
+                <div style="width:28px;height:28px;background:rgba(0,245,255,0.1);border:1px solid rgba(0,245,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Orbitron',monospace;font-size:0.7rem;color:var(--cyan);flex-shrink:0;">4</div>
+                <span style="font-size:0.85rem;color:var(--text-secondary);">Ball va izoh saqlanadi, resurs tartiblangan ro'yxatga qo'shiladi</span>
+            </div>
+        </div>
+    </div>
+                <div style="width:28px;height:28px;background:rgba(0,245,255,0.1);border:1px solid rgba(0,245,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Orbitron',monospace;font-size:0.7rem;color:var(--cyan);flex-shrink:0;">4</div>
+                <span style="font-size:0.85rem;color:var(--text-secondary);">Ball va izoh saqlanadi, resurs tartiblangan ro'yxatga qo'shiladi</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const typeSelect = document.getElementById('resource_type_select');
+    const sections = document.querySelectorAll('.resource-section');
+
+    function showSection(type) {
+        sections.forEach(s => s.style.display = 'none');
+        if (type) {
+            const target = document.getElementById('section-' + type);
+            if (target) target.style.display = 'block';
+        }
+    }
+
+    typeSelect.addEventListener('change', function() {
+        showSection(this.value);
+    });
+
+    // Show on load if value pre-selected
+    showSection(typeSelect.value);
+
+    // Show loading on submit
+    document.getElementById('uploadForm').addEventListener('submit', function() {
+        document.getElementById('submitText').textContent = 'Baholanmoqda...';
+        document.getElementById('submitSpinner').style.display = 'inline-block';
+        document.getElementById('submitBtn').disabled = true;
+    });
+
+    // Pre-select topic from URL param
+    const urlParams = new URLSearchParams(window.location.search);
+    const topicId = urlParams.get('topic');
+    if (topicId) {
+        const topicSelect = document.querySelector('[name="topic"]');
+        if (topicSelect) topicSelect.value = topicId;
+    }
+</script>
+{% endblock %}
