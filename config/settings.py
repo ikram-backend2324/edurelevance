@@ -8,7 +8,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-change-this-in-production')
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
-ALLOWED_HOSTS = ['*']
+
+ALLOWED_HOSTS = ['edurelevance.onrender.com', 'localhost', '127.0.0.1', '*']
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://edurelevance.onrender.com',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+]
+
+CSRF_COOKIE_SECURE = False
+SESSION_COOKIE_SECURE = False
 
 INSTALLED_APPS = [
     'jazzmin',
@@ -95,12 +105,6 @@ OPENROUTER_MODELS = [
     "mistralai/mistral-7b-instruct:free",
     "google/gemma-3-12b-it:free",
 ]
-CSRF_TRUSTED_ORIGINS = [
-    'https://edurelevance.onrender.com',
-    'http://localhost:8000',
-    'http://127.0.0.1:8000',
-]
-ALLOWED_HOSTS = ['https://edurelevance.onrender.com', 'localhost', '127.0.0.1']
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
