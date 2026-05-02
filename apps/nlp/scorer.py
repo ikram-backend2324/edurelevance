@@ -106,7 +106,7 @@ def _call_openrouter(model, prompt):
         "https://openrouter.ai/api/v1/chat/completions",
         headers=headers,
         json=payload,
-        timeout=30
+        timeout=20
     )
 
     if response.status_code != 200:
