@@ -95,6 +95,12 @@ OPENROUTER_MODELS = [
     "mistralai/mistral-7b-instruct:free",
     "google/gemma-3-12b-it:free",
 ]
+CSRF_TRUSTED_ORIGINS = [
+    'https://edurelevance.onrender.com',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+]
+ALLOWED_HOSTS = ['https://edurelevance.onrender.com', 'localhost', '127.0.0.1']
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
