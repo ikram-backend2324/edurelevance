@@ -11,6 +11,7 @@ urlpatterns = [
     path('resources/', include('apps.resources.urls')),
     path('api/subjects/', include('apps.subjects.api_urls')),
     path('api/resources/', include('apps.resources.api_urls')),
-    path('', RedirectView.as_view(url='/subjects/', permanent=False)),
+    path('ai/', include('apps.ai_eval.urls')),
+    path('', RedirectView.as_view(url='/ai/', permanent=False)),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) \
   + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

@@ -221,8 +221,21 @@
             <p>// AI POWERED EDUCATION PLATFORM</p>
         </div>
 
+        <!-- Language switcher on auth pages -->
+        <div style="display:flex;justify-content:center;margin-bottom:1rem;">
+            <div style="display:flex;gap:2px;background:rgba(0,245,255,0.04);border:1px solid rgba(0,245,255,0.15);border-radius:6px;padding:3px;">
+                <button class="lang-btn-auth" data-lang-target="uz" onclick="setLang('uz')" style="background:transparent;border:none;color:#3a6070;font-family:'Share Tech Mono',monospace;font-size:.72rem;letter-spacing:1px;padding:4px 9px;border-radius:4px;cursor:pointer;transition:all .2s;text-transform:uppercase;">UZB</button>
+                <button class="lang-btn-auth" data-lang-target="ru" onclick="setLang('ru')" style="background:transparent;border:none;color:#3a6070;font-family:'Share Tech Mono',monospace;font-size:.72rem;letter-spacing:1px;padding:4px 9px;border-radius:4px;cursor:pointer;transition:all .2s;text-transform:uppercase;">RUS</button>
+                <button class="lang-btn-auth" data-lang-target="en" onclick="setLang('en')" style="background:transparent;border:none;color:#3a6070;font-family:'Share Tech Mono',monospace;font-size:.72rem;letter-spacing:1px;padding:4px 9px;border-radius:4px;cursor:pointer;transition:all .2s;text-transform:uppercase;">ENG</button>
+            </div>
+        </div>
+
         <div class="auth-card">
-            <div class="auth-title">Tizimga kirish</div>
+            <div class="auth-title">
+                <span data-lang="uz">Tizimga kirish</span>
+                <span data-lang="ru">Вход в систему</span>
+                <span data-lang="en">Sign In</span>
+            </div>
 
             {% if messages %}
             <div class="messages-box">
@@ -235,32 +248,63 @@
             <form method="post">
                 {% csrf_token %}
                 <div class="form-group">
-                    <label class="form-label" for="{{ form.username.id_for_label }}">Foydalanuvchi nomi</label>
+                    <label class="form-label" for="{{ form.username.id_for_label }}">
+                        <span data-lang="uz">Foydalanuvchi nomi</span>
+                        <span data-lang="ru">Имя пользователя</span>
+                        <span data-lang="en">Username</span>
+                    </label>
                     {{ form.username }}
                     {% if form.username.errors %}
                     <div class="form-error">{{ form.username.errors.0 }}</div>
                     {% endif %}
                 </div>
                 <div class="form-group">
-                    <label class="form-label" for="{{ form.password.id_for_label }}">Parol</label>
+                    <label class="form-label" for="{{ form.password.id_for_label }}">
+                        <span data-lang="uz">Parol</span>
+                        <span data-lang="ru">Пароль</span>
+                        <span data-lang="en">Password</span>
+                    </label>
                     {{ form.password }}
                     {% if form.password.errors %}
                     <div class="form-error">{{ form.password.errors.0 }}</div>
                     {% endif %}
                 </div>
                 <button type="submit" class="btn-submit">
-                    <i class="fas fa-sign-in-alt"></i> Kirish
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span data-lang="uz">Kirish</span>
+                    <span data-lang="ru">Войти</span>
+                    <span data-lang="en">Sign In</span>
                 </button>
             </form>
 
             <div class="auth-footer">
-                Hisobingiz yo'qmi?
-                <a href="{% url 'accounts:register' %}">Ro'yxatdan o'ting</a>
+                <span data-lang="uz">Hisobingiz yo'qmi? <a href="{% url 'accounts:register' %}">Ro'yxatdan o'ting</a></span>
+                <span data-lang="ru">Нет аккаунта? <a href="{% url 'accounts:register' %}">Зарегистрироваться</a></span>
+                <span data-lang="en">No account? <a href="{% url 'accounts:register' %}">Register</a></span>
             </div>
         </div>
     </div>
 
     <script>
+        // Lang system for auth pages (no base.html)
+        const LANGS = ['uz','ru','en'];
+        function setLang(lang) {
+            if (!LANGS.includes(lang)) lang = 'uz';
+            localStorage.setItem('edu_lang', lang);
+            document.documentElement.lang = lang;
+            document.querySelectorAll('[data-lang]').forEach(el => {
+                el.style.display = el.getAttribute('data-lang') === lang ? '' : 'none';
+            });
+            document.querySelectorAll('.lang-btn-auth').forEach(btn => {
+                const isActive = btn.getAttribute('data-lang-target') === lang;
+                btn.style.background = isActive ? 'linear-gradient(135deg,rgba(0,245,255,.18),rgba(0,180,200,.1))' : 'transparent';
+                btn.style.color = isActive ? '#00f5ff' : '#3a6070';
+                btn.style.boxShadow = isActive ? '0 0 8px rgba(0,245,255,.2)' : 'none';
+            });
+        }
+        function getLang() { return localStorage.getItem('edu_lang') || 'uz'; }
+        document.addEventListener('DOMContentLoaded', () => setLang(getLang()));
+
         // Create floating particles
         const container = document.getElementById('particles');
         for (let i = 0; i < 30; i++) {

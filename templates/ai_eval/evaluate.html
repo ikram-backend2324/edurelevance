@@ -1,0 +1,329 @@
+{% extends "base/base.html" %}
+
+{% block title %}
+<span data-lang="uz">AI Baholash</span>
+<span data-lang="ru">AI Оценка</span>
+<span data-lang="en">AI Evaluate</span>
+ — EduRelevance
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.eval-wrap {
+    max-width: 780px;
+    margin: 0 auto;
+}
+.eval-hero {
+    text-align: center;
+    padding: 2.5rem 0 2rem;
+}
+.eval-hero .hero-icon {
+    font-size: 3rem;
+    color: var(--cyan);
+    text-shadow: var(--glow-cyan);
+    display: block;
+    margin-bottom: 1rem;
+    animation: pulse-icon 3s ease-in-out infinite;
+}
+@keyframes pulse-icon {
+    0%,100%{filter:drop-shadow(0 0 8px rgba(0,245,255,0.4));}
+    50%{filter:drop-shadow(0 0 24px rgba(0,245,255,0.9));}
+}
+.eval-hero h1 {
+    font-family:'Orbitron',monospace;
+    font-size:1.8rem;
+    font-weight:700;
+    color:var(--cyan);
+    text-shadow:var(--glow-cyan);
+    margin-bottom:.5rem;
+}
+.eval-hero p {
+    color:var(--text-secondary);
+    font-family:'Share Tech Mono',monospace;
+    font-size:.85rem;
+}
+.section-divider {
+    display:flex;align-items:center;gap:1rem;
+    margin:1.8rem 0 1.2rem;
+}
+.section-divider span {
+    font-family:'Orbitron',monospace;
+    font-size:.75rem;
+    color:var(--cyan);
+    letter-spacing:2px;
+    white-space:nowrap;
+}
+.section-divider::before,.section-divider::after {
+    content:'';flex:1;height:1px;
+    background:linear-gradient(90deg,transparent,var(--border),transparent);
+}
+.resource-type-tabs {
+    display:flex;gap:.5rem;margin-bottom:1.2rem;flex-wrap:wrap;
+}
+.type-tab {
+    flex:1;min-width:80px;
+    padding:10px 8px;
+    background:rgba(0,245,255,0.03);
+    border:1px solid var(--border);
+    border-radius:6px;
+    color:var(--text-muted);
+    font-family:'Share Tech Mono',monospace;
+    font-size:.8rem;
+    letter-spacing:1px;
+    cursor:pointer;
+    transition:all .2s;
+    text-align:center;
+}
+.type-tab:hover{color:var(--text-secondary);border-color:rgba(0,245,255,0.3);}
+.type-tab.active{
+    background:linear-gradient(135deg,rgba(0,245,255,0.15),rgba(0,180,200,0.08));
+    border-color:var(--cyan-dim);
+    color:var(--cyan);
+    box-shadow:0 0 12px rgba(0,245,255,0.15);
+}
+.type-tab i{display:block;font-size:1.2rem;margin-bottom:4px;}
+.resource-panel{display:none;}
+.resource-panel.active{display:block;}
+.submit-row{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-top:1.8rem;flex-wrap:wrap;}
+.char-hint{font-family:'Share Tech Mono',monospace;font-size:.75rem;color:var(--text-muted);}
+.field-error{border-color:var(--red)!important;box-shadow:0 0 0 3px rgba(255,23,68,0.15)!important;}
+.loading-overlay{
+    display:none;position:fixed;inset:0;z-index:999;
+    background:rgba(2,4,8,.85);backdrop-filter:blur(8px);
+    align-items:center;justify-content:center;flex-direction:column;gap:1.5rem;
+}
+.loading-overlay.active{display:flex;}
+.loading-ring{
+    width:70px;height:70px;
+    border:3px solid var(--border);
+    border-top-color:var(--cyan);
+    border-radius:50%;
+    animation:spin 1s linear infinite;
+}
+.loading-text{
+    font-family:'Orbitron',monospace;
+    font-size:.9rem;
+    color:var(--cyan);
+    letter-spacing:2px;
+    text-shadow:var(--glow-cyan);
+}
+.loading-sub{
+    font-family:'Share Tech Mono',monospace;
+    font-size:.75rem;
+    color:var(--text-muted);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- hidden lang input synced with global switcher -->
+<input type="hidden" id="selectedLang" value="uz">
+
+<div class="eval-wrap fade-in">
+    <div class="eval-hero">
+        <i class="fas fa-brain hero-icon"></i>
+        <h1>
+            <span data-lang="uz">AI BAHOLASH</span>
+            <span data-lang="ru">AI ОЦЕНКА</span>
+            <span data-lang="en">AI EVALUATE</span>
+        </h1>
+        <p>
+            <span data-lang="uz">Fan va mavzu kiriting — AI dolzarbligini baholaydi</span>
+            <span data-lang="ru">Введите предмет и тему — AI оценит релевантность</span>
+            <span data-lang="en">Enter subject and topic — AI evaluates relevance</span>
+        </p>
+    </div>
+
+    <div class="cyber-card">
+        <form method="post" enctype="multipart/form-data" id="evalForm">
+            {% csrf_token %}
+            <input type="hidden" name="language" id="langField" value="uz">
+
+            <!-- SUBJECT & TOPIC -->
+            <div class="section-divider">
+                <span>
+                    <span data-lang="uz">FAN VA MAVZU</span>
+                    <span data-lang="ru">ПРЕДМЕТ И ТЕМА</span>
+                    <span data-lang="en">SUBJECT & TOPIC</span>
+                </span>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+                <div class="form-group">
+                    <label class="form-label">
+                        <span data-lang="uz">Fan nomi</span>
+                        <span data-lang="ru">Предмет</span>
+                        <span data-lang="en">Subject</span>
+                    </label>
+                    <input type="text" name="subject_name"
+                        class="cyber-input {% if 'subject' in errors %}field-error{% endif %}"
+                        value="{{ post.subject_name|default:'' }}"
+                        placeholder="e.g. Matematika / Математика / Mathematics"
+                        required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">
+                        <span data-lang="uz">Mavzu nomi</span>
+                        <span data-lang="ru">Тема</span>
+                        <span data-lang="en">Topic</span>
+                    </label>
+                    <input type="text" name="topic_name"
+                        class="cyber-input {% if 'topic' in errors %}field-error{% endif %}"
+                        value="{{ post.topic_name|default:'' }}"
+                        placeholder="e.g. Kvadrat tenglamalar"
+                        required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    <span data-lang="uz">Mavzu tavsifi</span>
+                    <span data-lang="ru">Описание темы</span>
+                    <span data-lang="en">Topic description</span>
+                </label>
+                <textarea name="topic_description" rows="3"
+                    class="cyber-input {% if 'description' in errors %}field-error{% endif %}"
+                    placeholder="Describe what this topic covers...">{{ post.topic_description|default:'' }}</textarea>
+            </div>
+
+            <!-- RESOURCE -->
+            <div class="section-divider">
+                <span>
+                    <span data-lang="uz">RESURS</span>
+                    <span data-lang="ru">РЕСУРС</span>
+                    <span data-lang="en">RESOURCE</span>
+                </span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">
+                    <span data-lang="uz">Resurs sarlavhasi</span>
+                    <span data-lang="ru">Название ресурса</span>
+                    <span data-lang="en">Resource title</span>
+                </label>
+                <input type="text" name="resource_title"
+                    class="cyber-input {% if 'title' in errors %}field-error{% endif %}"
+                    value="{{ post.resource_title|default:'' }}"
+                    placeholder="Title / Sarlavha / Название" required>
+            </div>
+
+            <!-- Type tabs -->
+            <div class="resource-type-tabs">
+                <button type="button" class="type-tab active" data-type="text" onclick="switchType('text')">
+                    <i class="fas fa-align-left"></i>
+                    <span data-lang="uz">Matn</span>
+                    <span data-lang="ru">Текст</span>
+                    <span data-lang="en">Text</span>
+                </button>
+                <button type="button" class="type-tab" data-type="url" onclick="switchType('url')">
+                    <i class="fas fa-link"></i>
+                    URL
+                </button>
+                <button type="button" class="type-tab" data-type="pdf" onclick="switchType('pdf')">
+                    <i class="fas fa-file-pdf"></i>
+                    PDF
+                </button>
+            </div>
+            <input type="hidden" name="resource_type" id="resourceTypeInput" value="{{ post.resource_type|default:'text' }}">
+
+            <div class="resource-panel active" id="panel-text">
+                <div class="form-group">
+                    <label class="form-label">
+                        <span data-lang="uz">Matn</span>
+                        <span data-lang="ru">Текст</span>
+                        <span data-lang="en">Content text</span>
+                    </label>
+                    <textarea name="resource_text" rows="6"
+                        class="cyber-input {% if 'text' in errors %}field-error{% endif %}"
+                        placeholder="Paste your content here...">{{ post.resource_text|default:'' }}</textarea>
+                </div>
+            </div>
+
+            <div class="resource-panel" id="panel-url">
+                <div class="form-group">
+                    <label class="form-label">URL</label>
+                    <input type="url" name="resource_url"
+                        class="cyber-input {% if 'url' in errors %}field-error{% endif %}"
+                        value="{{ post.resource_url|default:'' }}"
+                        placeholder="https://...">
+                </div>
+            </div>
+
+            <div class="resource-panel" id="panel-pdf">
+                <div class="form-group">
+                    <label class="form-label">PDF</label>
+                    <input type="file" name="resource_file" class="cyber-file-input" accept=".pdf">
+                </div>
+            </div>
+
+            <div class="submit-row">
+                <span class="char-hint">
+                    <span data-lang="uz">Til tanlash yuqoridagi tugmalardan</span>
+                    <span data-lang="ru">Язык выбирается вверху</span>
+                    <span data-lang="en">Language selected above in navbar</span>
+                </span>
+                <button type="submit" class="btn-cyber btn-primary" id="submitBtn">
+                    <i class="fas fa-robot"></i>
+                    <span data-lang="uz">Baholash</span>
+                    <span data-lang="ru">Оценить</span>
+                    <span data-lang="en">Evaluate</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Loading overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-ring"></div>
+    <div class="loading-text">
+        <span data-lang="uz">AI BAHOLAYAPTI...</span>
+        <span data-lang="ru">AI ОЦЕНИВАЕТ...</span>
+        <span data-lang="en">AI EVALUATING...</span>
+    </div>
+    <div class="loading-sub">
+        <span data-lang="uz">Bu 10-30 soniya olishi mumkin</span>
+        <span data-lang="ru">Это займёт 10–30 секунд</span>
+        <span data-lang="en">This may take 10–30 seconds</span>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function switchType(type) {
+    document.querySelectorAll('.resource-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.type-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('panel-' + type).classList.add('active');
+    document.querySelector('[data-type="' + type + '"]').classList.add('active');
+    document.getElementById('resourceTypeInput').value = type;
+}
+
+// Sync lang field with global lang switcher
+document.addEventListener('langchange', e => {
+    document.getElementById('langField').value = e.detail.lang;
+    document.getElementById('selectedLang').value = e.detail.lang;
+});
+// Init
+document.addEventListener('DOMContentLoaded', () => {
+    const l = getLang();
+    document.getElementById('langField').value = l;
+    document.getElementById('selectedLang').value = l;
+
+    // Restore type tab if post back
+    const savedType = '{{ post.resource_type|default:"text" }}';
+    if (savedType && savedType !== 'text') switchType(savedType);
+});
+
+// Show loading on submit
+document.getElementById('evalForm').addEventListener('submit', function() {
+    const overlay = document.getElementById('loadingOverlay');
+    overlay.classList.add('active');
+    // re-apply lang to overlay spans
+    const lang = getLang();
+    overlay.querySelectorAll('[data-lang]').forEach(el => {
+        el.style.display = el.getAttribute('data-lang') === lang ? '' : 'none';
+    });
+});
+</script>
+{% endblock %}

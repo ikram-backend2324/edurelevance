@@ -145,10 +145,28 @@
         <div class="auth-logo">
             <i class="fas fa-brain logo-icon"></i>
             <h1>EDURELEVANCE</h1>
-            <p>// YANGI HISOB YARATISH</p>
+            <p>
+                <span data-lang="uz">// YANGI HISOB YARATISH</span>
+                <span data-lang="ru">// СОЗДАТЬ АККАУНТ</span>
+                <span data-lang="en">// CREATE ACCOUNT</span>
+            </p>
         </div>
+
+        <!-- Language switcher -->
+        <div style="display:flex;justify-content:center;margin-bottom:1rem;">
+            <div style="display:flex;gap:2px;background:rgba(0,245,255,0.04);border:1px solid rgba(0,245,255,0.15);border-radius:6px;padding:3px;">
+                <button class="lang-btn-auth" data-lang-target="uz" onclick="setLang('uz')" style="background:transparent;border:none;color:#3a6070;font-family:'Share Tech Mono',monospace;font-size:.72rem;letter-spacing:1px;padding:4px 9px;border-radius:4px;cursor:pointer;transition:all .2s;text-transform:uppercase;">UZB</button>
+                <button class="lang-btn-auth" data-lang-target="ru" onclick="setLang('ru')" style="background:transparent;border:none;color:#3a6070;font-family:'Share Tech Mono',monospace;font-size:.72rem;letter-spacing:1px;padding:4px 9px;border-radius:4px;cursor:pointer;transition:all .2s;text-transform:uppercase;">RUS</button>
+                <button class="lang-btn-auth" data-lang-target="en" onclick="setLang('en')" style="background:transparent;border:none;color:#3a6070;font-family:'Share Tech Mono',monospace;font-size:.72rem;letter-spacing:1px;padding:4px 9px;border-radius:4px;cursor:pointer;transition:all .2s;text-transform:uppercase;">ENG</button>
+            </div>
+        </div>
+
         <div class="auth-card">
-            <div class="auth-title">Ro'yxatdan o'tish</div>
+            <div class="auth-title">
+                <span data-lang="uz">Ro'yxatdan o'tish</span>
+                <span data-lang="ru">Регистрация</span>
+                <span data-lang="en">Register</span>
+            </div>
             {% if messages %}
             <div class="messages-box">
                 {% for message in messages %}
@@ -159,7 +177,11 @@
             <form method="post">
                 {% csrf_token %}
                 <div class="form-group">
-                    <label class="form-label">Foydalanuvchi nomi</label>
+                    <label class="form-label">
+                        <span data-lang="uz">Foydalanuvchi nomi</span>
+                        <span data-lang="ru">Имя пользователя</span>
+                        <span data-lang="en">Username</span>
+                    </label>
                     {{ form.username }}
                     {% if form.username.errors %}<div class="form-error">{{ form.username.errors.0 }}</div>{% endif %}
                 </div>
@@ -169,12 +191,20 @@
                     {% if form.email.errors %}<div class="form-error">{{ form.email.errors.0 }}</div>{% endif %}
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Parol</label>
+                    <label class="form-label">
+                        <span data-lang="uz">Parol</span>
+                        <span data-lang="ru">Пароль</span>
+                        <span data-lang="en">Password</span>
+                    </label>
                     {{ form.password1 }}
                     {% if form.password1.errors %}<div class="form-error">{{ form.password1.errors.0 }}</div>{% endif %}
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Parolni tasdiqlang</label>
+                    <label class="form-label">
+                        <span data-lang="uz">Parolni tasdiqlang</span>
+                        <span data-lang="ru">Подтвердите пароль</span>
+                        <span data-lang="en">Confirm password</span>
+                    </label>
                     {{ form.password2 }}
                     {% if form.password2.errors %}<div class="form-error">{{ form.password2.errors.0 }}</div>{% endif %}
                 </div>
@@ -182,15 +212,38 @@
                 <div class="form-error" style="margin-bottom:1rem">{{ form.non_field_errors.0 }}</div>
                 {% endif %}
                 <button type="submit" class="btn-submit">
-                    <i class="fas fa-user-plus"></i> Ro'yxatdan o'tish
+                    <i class="fas fa-user-plus"></i>
+                    <span data-lang="uz">Ro'yxatdan o'tish</span>
+                    <span data-lang="ru">Зарегистрироваться</span>
+                    <span data-lang="en">Register</span>
                 </button>
             </form>
             <div class="auth-footer">
-                Hisobingiz bormi? <a href="{% url 'accounts:login' %}">Kirish</a>
+                <span data-lang="uz">Hisobingiz bormi? <a href="{% url 'accounts:login' %}">Kirish</a></span>
+                <span data-lang="ru">Уже есть аккаунт? <a href="{% url 'accounts:login' %}">Войти</a></span>
+                <span data-lang="en">Already have an account? <a href="{% url 'accounts:login' %}">Sign In</a></span>
             </div>
         </div>
     </div>
     <script>
+        const LANGS = ['uz','ru','en'];
+        function setLang(lang) {
+            if (!LANGS.includes(lang)) lang = 'uz';
+            localStorage.setItem('edu_lang', lang);
+            document.documentElement.lang = lang;
+            document.querySelectorAll('[data-lang]').forEach(el => {
+                el.style.display = el.getAttribute('data-lang') === lang ? '' : 'none';
+            });
+            document.querySelectorAll('.lang-btn-auth').forEach(btn => {
+                const isActive = btn.getAttribute('data-lang-target') === lang;
+                btn.style.background = isActive ? 'linear-gradient(135deg,rgba(0,245,255,.18),rgba(0,180,200,.1))' : 'transparent';
+                btn.style.color = isActive ? '#00f5ff' : '#3a6070';
+                btn.style.boxShadow = isActive ? '0 0 8px rgba(0,245,255,.2)' : 'none';
+            });
+        }
+        function getLang() { return localStorage.getItem('edu_lang') || 'uz'; }
+        document.addEventListener('DOMContentLoaded', () => setLang(getLang()));
+
         const container = document.getElementById('particles');
         for (let i = 0; i < 25; i++) {
             const p = document.createElement('div');
